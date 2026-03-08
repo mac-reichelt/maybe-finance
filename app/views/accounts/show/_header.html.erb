@@ -32,6 +32,8 @@
                          sync_plaid_item_path(account.plaid_account.plaid_item)
                        elsif account.simplefin_account.present?
                          sync_simplefin_item_path(account.simplefin_account.simplefin_item)
+                       elsif account.klutch_account.present?
+                         sync_klutch_item_path(account.klutch_account.klutch_item)
                        else
                          sync_account_path(account)
                        end %>

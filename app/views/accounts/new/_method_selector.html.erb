@@ -44,5 +44,17 @@
         Link via SimpleFIN
       <% end %>
     <% end %>
+
+    <%# Klutch Card Link %>
+    <% if Current.family.can_connect_klutch? %>
+      <%= link_to new_klutch_item_path,
+                  class: "text-primary flex items-center gap-4 w-full text-center focus:outline-hidden focus:bg-gray-50 border border-transparent focus:border focus:border-gray-200 px-2 hover:bg-gray-50 rounded-lg p-2",
+                  data: { turbo_frame: "modal" } do %>
+        <span class="flex w-8 h-8 shrink-0 grow-0 items-center justify-center rounded-lg bg-orange-50 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.02)]">
+          <%= icon("credit-card") %>
+        </span>
+        Link via Klutch Card
+      <% end %>
+    <% end %>
   </div>
 <% end %>
