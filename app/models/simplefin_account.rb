@@ -38,13 +38,18 @@ class SimplefinAccount < ApplicationRecord
   end
 
   # SimpleFIN doesn't reliably provide account type,
-  # so we infer from balance and other heuristics
+  # so we infer from balance, name, and org heuristics
   def classify_account_type(account_data)
     balance = account_data["balance"].to_d
+    name = (account_data["name"] || "").downcase
+    org_name = (account_data.dig("org", "name") || "").downcase
 
-    # If the balance is negative, it's likely a credit/liability account
-    if balance < 0
-      "credit"
+    return "credit" if balance < 0
+    return "credit" if name.match?(/\b(visa|mastercard|credit\s*card|store\s*card|amex)\b/i)
+    return "credit" if org_name.match?(/credit\s*card/i)
+
+    if name.match?(/\b(savings?|checking|money\s*market)\b/i)
+      "depository"
     else
       "depository"
     end
