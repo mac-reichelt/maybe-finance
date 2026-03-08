@@ -1,0 +1,52 @@
+class SimplefinAccount < ApplicationRecord
+  belongs_to :simplefin_item
+
+  has_one :account, dependent: :destroy
+
+  validates :name, :currency, presence: true
+
+  validate :has_balance
+
+  def upsert_simplefin_snapshot!(account_data)
+    assign_attributes(
+      current_balance: account_data["balance"].to_d,
+      available_balance: account_data["available-balance"]&.to_d,
+      currency: account_data["currency"]&.upcase || "USD",
+      account_type: classify_account_type(account_data),
+      name: account_data["name"],
+      org_name: account_data.dig("org", "name"),
+      org_url: account_data.dig("org", "url"),
+      raw_payload: account_data
+    )
+
+    save!
+  end
+
+  def upsert_simplefin_transactions_snapshot!(transactions)
+    assign_attributes(
+      raw_transactions_payload: { "transactions" => transactions }
+    )
+
+    save!
+  end
+
+  private
+
+  def has_balance
+    return if current_balance.present? || available_balance.present?
+    errors.add(:base, "SimpleFIN account must have either current or available balance")
+  end
+
+  # SimpleFIN doesn't reliably provide account type,
+  # so we infer from balance and other heuristics
+  def classify_account_type(account_data)
+    balance = account_data["balance"].to_d
+
+    # If the balance is negative, it's likely a credit/liability account
+    if balance < 0
+      "credit"
+    else
+      "depository"
+    end
+  end
+end

@@ -1,0 +1,79 @@
+<%# locals: (simplefin_item:) %>
+
+<%= tag.div id: dom_id(simplefin_item) do %>
+  <details open class="group bg-container p-4 shadow-border-xs rounded-xl">
+    <summary class="flex items-center justify-between gap-2 focus-visible:outline-hidden">
+      <div class="flex items-center gap-2">
+        <%= icon "chevron-right", class: "group-open:transform group-open:rotate-90" %>
+
+        <div class="flex items-center justify-center h-8 w-8 bg-green-600/10 rounded-full">
+          <div class="flex items-center justify-center">
+            <%= tag.p simplefin_item.name.first.upcase, class: "text-green-600 text-xs font-medium" %>
+          </div>
+        </div>
+
+        <div class="pl-1 text-sm">
+          <div class="flex items-center gap-2">
+            <%= tag.p simplefin_item.name, class: "font-medium text-primary" %>
+            <span class="text-xs text-secondary bg-green-100 text-green-700 px-1.5 py-0.5 rounded">SimpleFIN</span>
+            <% if simplefin_item.scheduled_for_deletion? %>
+              <p class="text-destructive text-sm animate-pulse">(deletion in progress...)</p>
+            <% end %>
+          </div>
+          <% if simplefin_item.syncing? %>
+            <div class="text-secondary flex items-center gap-1">
+              <%= icon "loader", size: "sm", class: "animate-pulse" %>
+              <span>Syncing...</span>
+            </div>
+          <% elsif simplefin_item.requires_update? %>
+            <div class="text-warning flex items-center gap-1">
+              <%= icon "alert-triangle", size: "sm", color: "warning" %>
+              <span>Requires re-authentication</span>
+            </div>
+          <% elsif simplefin_item.sync_error.present? %>
+            <div class="text-secondary flex items-center gap-1">
+              <%= icon "alert-circle", size: "sm", color: "destructive" %>
+              <span class="text-destructive">Error occurred while syncing data</span>
+            </div>
+          <% else %>
+            <p class="text-secondary">
+              <%= simplefin_item.last_synced_at ? "Last synced #{time_ago_in_words(simplefin_item.last_synced_at)} ago" : "Requires data sync" %>
+            </p>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <%= icon(
+          "refresh-cw",
+          as_button: true,
+          href: sync_simplefin_item_path(simplefin_item)
+        ) %>
+
+        <%= render DS::Menu.new do |menu| %>
+          <% menu.with_item(
+            variant: "button",
+            text: "Delete",
+            icon: "trash-2",
+            href: simplefin_item_path(simplefin_item),
+            method: :delete,
+            confirm: CustomConfirm.for_resource_deletion(simplefin_item.name, high_severity: true)
+          ) %>
+        <% end %>
+      </div>
+    </summary>
+
+    <% unless simplefin_item.scheduled_for_deletion? %>
+      <div class="space-y-4 mt-4">
+        <% if simplefin_item.accounts.any? %>
+          <%= render "accounts/index/account_groups", accounts: simplefin_item.accounts %>
+        <% else %>
+          <div class="p-4 flex flex-col gap-3 items-center justify-center">
+            <p class="text-primary font-medium text-sm">No accounts found</p>
+            <p class="text-secondary text-sm">We could not load any accounts from this SimpleFIN connection.</p>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </details>
+<% end %>
