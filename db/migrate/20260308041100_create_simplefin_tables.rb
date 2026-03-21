@@ -1,0 +1,37 @@
+class CreateSimplefinTables < ActiveRecord::Migration[7.2]
+  def change
+    create_table :simplefin_items, id: :uuid, default: -> { "gen_random_uuid()" } do |t|
+      t.references :family, null: false, foreign_key: true, type: :uuid
+      t.string :access_url, null: false
+      t.string :name, null: false
+      t.string :status, null: false, default: "good"
+      t.boolean :scheduled_for_deletion, default: false
+      t.jsonb :raw_payload, default: {}
+
+      t.timestamps
+    end
+
+    create_table :simplefin_accounts, id: :uuid, default: -> { "gen_random_uuid()" } do |t|
+      t.references :simplefin_item, null: false, foreign_key: true, type: :uuid
+      t.string :simplefin_id, null: false
+      t.string :account_type
+      t.decimal :current_balance, precision: 19, scale: 4
+      t.decimal :available_balance, precision: 19, scale: 4
+      t.string :currency, null: false
+      t.string :name, null: false
+      t.string :org_name
+      t.string :org_url
+      t.jsonb :raw_payload, default: {}
+      t.jsonb :raw_transactions_payload, default: {}
+
+      t.timestamps
+
+      t.index :simplefin_id, unique: true
+    end
+
+    add_reference :accounts, :simplefin_account, type: :uuid, foreign_key: true, index: true
+
+    add_column :entries, :simplefin_id, :string
+    add_index :entries, :simplefin_id
+  end
+end

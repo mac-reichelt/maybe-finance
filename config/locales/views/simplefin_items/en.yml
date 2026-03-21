@@ -1,0 +1,8 @@
+---
+en:
+  simplefin_items:
+    create:
+      success: SimpleFIN account linked successfully. Please wait for accounts to sync.
+      error: "Failed to connect SimpleFIN: %{message}"
+    destroy:
+      success: SimpleFIN accounts scheduled for deletion.
