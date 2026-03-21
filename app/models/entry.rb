@@ -57,7 +57,7 @@ class Entry < ApplicationRecord
   end
 
   def linked?
-    plaid_id.present? || simplefin_id.present?
+    plaid_id.present? || simplefin_id.present? || klutch_id.present?
   end
 
   class << self

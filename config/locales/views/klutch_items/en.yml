@@ -1,0 +1,8 @@
+---
+en:
+  klutch_items:
+    create:
+      success: Klutch Card account linked successfully. Please wait for accounts to sync.
+      error: "Failed to connect Klutch Card: %{message}"
+    destroy:
+      success: Klutch Card accounts scheduled for deletion.
