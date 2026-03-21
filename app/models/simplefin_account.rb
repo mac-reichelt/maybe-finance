@@ -33,7 +33,7 @@ class SimplefinAccount < ApplicationRecord
   private
 
   def has_balance
-    return if current_balance.present? || available_balance.present?
+    return if !current_balance.nil? || !available_balance.nil?
     errors.add(:base, "SimpleFIN account must have either current or available balance")
   end
 

@@ -33,7 +33,7 @@ class Provider::Simplefin
     params["start-date"] = start_date.to_time.to_i if start_date
     params["end-date"] = end_date.to_time.to_i if end_date
 
-    response = connection.get("/accounts", params)
+    response = connection.get("#{base_path}/accounts", params)
 
     unless response.success?
       raise StandardError, "SimpleFIN API error: #{response.status} - #{response.body}"
@@ -55,5 +55,9 @@ class Provider::Simplefin
       f.request :retry, max: 2, interval: 1
       f.adapter Faraday.default_adapter
     end
+  end
+
+  def base_path
+    URI.parse(access_url).path.chomp("/")
   end
 end
