@@ -18,6 +18,8 @@ module Authentication
     def authenticate_user!
       if session_record = find_session_by_cookie
         Current.session = session_record
+      elsif auth_proxy_enabled? && (session_record = authenticate_via_proxy_header)
+        Current.session = session_record
       else
         if self_hosted_first_login?
           redirect_to new_registration_url
@@ -25,6 +27,38 @@ module Authentication
           redirect_to new_session_url
         end
       end
+    end
+
+    def auth_proxy_enabled?
+      ENV["AUTH_PROXY_HEADER"].present?
+    end
+
+    def authenticate_via_proxy_header
+      email = request.headers[ENV["AUTH_PROXY_HEADER"]]
+      return nil if email.blank?
+
+      user = User.find_by(email: email.strip.downcase)
+
+      if user.nil? && self_hosted_first_login?
+        remote_name = request.headers["Remote-Name"]
+        first_name = remote_name&.split&.first
+        last_name = remote_name&.split&.drop(1)&.join(" ").presence
+
+        family = Family.new
+        user = User.create!(
+          email: email.strip.downcase,
+          first_name: first_name,
+          last_name: last_name,
+          password: SecureRandom.hex(32),
+          family: family,
+          role: :admin
+        )
+      end
+
+      return nil unless user
+
+      # Reuse existing session or create a new one
+      find_session_by_cookie || create_session_for(user)
     end
 
     def find_session_by_cookie
