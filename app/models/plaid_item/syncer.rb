@@ -21,6 +21,8 @@ class PlaidItem::Syncer
   end
 
   def perform_post_sync
-    # no-op
+    plaid_item.family.rules.each do |rule|
+      rule.apply_later
+    end
   end
 end

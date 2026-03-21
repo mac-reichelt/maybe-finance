@@ -18,6 +18,8 @@ class SimplefinItem::Syncer
   end
 
   def perform_post_sync
-    # no-op
+    simplefin_item.family.rules.each do |rule|
+      rule.apply_later
+    end
   end
 end
