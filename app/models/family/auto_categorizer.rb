@@ -46,9 +46,10 @@ class Family::AutoCategorizer
   private
     attr_reader :family, :transaction_ids
 
-    # For now, OpenAI only, but this should work with any LLM concept provider
+    # Use first available LLM provider (prefers Ollama, falls back to OpenAI)
     def llm_provider
-      Provider::Registry.get_provider(:openai)
+      registry = Provider::Registry.for_concept(:llm)
+      registry.providers.compact.first
     end
 
     def user_categories_input
