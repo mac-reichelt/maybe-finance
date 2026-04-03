@@ -54,10 +54,35 @@ class Provider::Ollama < Provider
 
       messages = chat_config.build_messages(prompt, instructions: instructions)
 
-      collected_chunks = []
+      has_tools = chat_config.tools.present?
 
-      stream_proxy = if streamer.present?
-        proc do |chunk, _bytesize|
+      # When tools are defined, use non-streaming to ensure tool_calls are
+      # captured reliably. Synthesize streaming events for the caller.
+      if has_tools || streamer.nil?
+        params = {
+          model: chat_model,
+          messages: messages,
+          tools: chat_config.tools.presence || nil
+        }.compact
+
+        raw_response = client.chat(parameters: params)
+        parsed = ChatParser.new(raw_response, model: chat_model).parsed
+
+        if streamer.present?
+          # Synthesize streaming events so the Responder receives expected callbacks
+          if parsed.messages.any?
+            parsed.messages.each do |msg|
+              streamer.call(Provider::LlmConcept::ChatStreamChunk.new(type: "output_text", data: msg.output_text))
+            end
+          end
+          streamer.call(Provider::LlmConcept::ChatStreamChunk.new(type: "response", data: parsed))
+        end
+
+        parsed
+      else
+        collected_chunks = []
+
+        stream_proxy = proc do |chunk, _bytesize|
           parsed_chunk = ChatStreamParser.new(chunk).parsed
 
           unless parsed_chunk.nil?
@@ -65,24 +90,17 @@ class Provider::Ollama < Provider
             collected_chunks << parsed_chunk
           end
         end
-      else
-        nil
-      end
 
-      params = {
-        model: chat_model,
-        messages: messages,
-        tools: chat_config.tools.presence || nil,
-        stream: stream_proxy
-      }.compact
+        params = {
+          model: chat_model,
+          messages: messages,
+          stream: stream_proxy
+        }
 
-      raw_response = client.chat(parameters: params)
+        raw_response = client.chat(parameters: params)
 
-      if stream_proxy.present?
         response_chunk = collected_chunks.find { |chunk| chunk.type == "response" }
-        response_chunk&.data || ChatParser.new(raw_response, model: chat_model).parsed
-      else
-        ChatParser.new(raw_response, model: chat_model).parsed
+        response_chunk&.data || ChatParser.new(raw_response || {}, model: chat_model).parsed
       end
     end
   end
