@@ -8,7 +8,8 @@ class Provider::Ollama < Provider
     @default_model = model || "qwen2.5:7b"
     @client = ::OpenAI::Client.new(
       access_token: "ollama",
-      uri_base: "#{@base_url}/v1"
+      uri_base: "#{@base_url}/v1",
+      request_timeout: 600
     )
   end
 
