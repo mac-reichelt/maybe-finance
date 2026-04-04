@@ -108,7 +108,7 @@ class Assistant::Function::GetTransactions < Assistant::Function
         },
         categories: {
           type: "array",
-          description: "Filter transactions by category name",
+          description: "Filter transactions by category name. Selecting a parent category automatically includes its subcategories.",
           items: { enum: family_category_names },
           minItems: 1,
           uniqueItems: true
