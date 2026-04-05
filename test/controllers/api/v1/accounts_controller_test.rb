@@ -214,4 +214,89 @@ end
     account_names = response_body["accounts"].map { |a| a["name"] }
     assert_equal account_names.sort, account_names
   end
+
+  # === sync_all tests ===
+
+  test "sync_all should require authentication" do
+    post "/api/v1/accounts/sync_all"
+    assert_response :unauthorized
+  end
+
+  test "sync_all should require write scope" do
+    access_token = Doorkeeper::AccessToken.create!(
+      application: @oauth_app,
+      resource_owner_id: @user.id,
+      scopes: "read"
+    )
+
+    post "/api/v1/accounts/sync_all", headers: {
+      "Authorization" => "Bearer #{access_token.token}"
+    }
+
+    assert_response :forbidden
+    response_body = JSON.parse(response.body)
+    assert_equal "insufficient_scope", response_body["error"]
+  end
+
+  test "sync_all should initiate sync and return 202" do
+    access_token = Doorkeeper::AccessToken.create!(
+      application: @oauth_app,
+      resource_owner_id: @user.id,
+      scopes: "read_write"
+    )
+
+    post "/api/v1/accounts/sync_all", headers: {
+      "Authorization" => "Bearer #{access_token.token}"
+    }
+
+    assert_response :accepted
+    response_body = JSON.parse(response.body)
+
+    assert_equal "Sync initiated for all accounts", response_body["message"]
+    assert response_body.key?("sync")
+    assert response_body["sync"].key?("id")
+    assert_equal "pending", response_body["sync"]["status"]
+    assert response_body["sync"].key?("created_at")
+  end
+
+  test "sync_all should return 200 with sync info when sync already in progress" do
+    access_token = Doorkeeper::AccessToken.create!(
+      application: @oauth_app,
+      resource_owner_id: @user.id,
+      scopes: "read_write"
+    )
+
+    # Create an incomplete sync
+    existing_sync = @user.family.syncs.create!(status: :pending)
+
+    post "/api/v1/accounts/sync_all", headers: {
+      "Authorization" => "Bearer #{access_token.token}"
+    }
+
+    assert_response :ok
+    response_body = JSON.parse(response.body)
+
+    assert_equal "Sync already in progress", response_body["message"]
+    assert response_body.key?("sync")
+    assert_equal existing_sync.id, response_body["sync"]["id"]
+    assert_equal "pending", response_body["sync"]["status"]
+  end
+
+  test "sync_all should work with API key authentication" do
+    plain_key = ApiKey.generate_secure_key
+    @user.api_keys.create!(
+      name: "test-key",
+      display_key: plain_key,
+      scopes: [ "read_write" ],
+      source: "web"
+    )
+
+    post "/api/v1/accounts/sync_all", headers: {
+      "X-Api-Key" => plain_key
+    }
+
+    assert_response :accepted
+    response_body = JSON.parse(response.body)
+    assert_equal "Sync initiated for all accounts", response_body["message"]
+  end
 end
