@@ -211,7 +211,7 @@ Rails.application.routes.draw do
       # Production API endpoints
       resources :accounts, only: [ :index ] do
         collection do
-          post :sync, action: :sync_all
+          post :sync_all
         end
       end
       resources :transactions, only: [ :index, :show, :create, :update, :destroy ]
