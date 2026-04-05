@@ -79,6 +79,8 @@ jobs:
     env:
       PLAID_CLIENT_ID: foo
       PLAID_SECRET: bar
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       DATABASE_URL: postgres://postgres:postgres@localhost:5432
       REDIS_URL: redis://localhost:6379
       RAILS_ENV: test

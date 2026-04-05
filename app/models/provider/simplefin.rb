@@ -44,20 +44,20 @@ class Provider::Simplefin
 
   private
 
-  def connection
-    parsed = URI.parse(access_url)
+    def connection
+      parsed = URI.parse(access_url)
 
-    @connection ||= Faraday.new(
-      url: "#{parsed.scheme}://#{parsed.host}:#{parsed.port}",
-      headers: { "Accept" => "application/json" }
-    ) do |f|
-      f.request :authorization, :basic, parsed.user, parsed.password
-      f.request :retry, max: 2, interval: 1
-      f.adapter Faraday.default_adapter
+      @connection ||= Faraday.new(
+        url: "#{parsed.scheme}://#{parsed.host}:#{parsed.port}",
+        headers: { "Accept" => "application/json" }
+      ) do |f|
+        f.request :authorization, :basic, parsed.user, parsed.password
+        f.request :retry, max: 2, interval: 1
+        f.adapter Faraday.default_adapter
+      end
     end
-  end
 
-  def base_path
-    URI.parse(access_url).path.chomp("/")
-  end
+    def base_path
+      URI.parse(access_url).path.chomp("/")
+    end
 end
