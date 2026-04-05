@@ -288,7 +288,7 @@ end
       name: "test-key",
       display_key: plain_key,
       scopes: [ "read_write" ],
-      source: "web"
+      source: "mobile"
     )
 
     post "/api/v1/accounts/sync_all", headers: {
