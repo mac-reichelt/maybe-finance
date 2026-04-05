@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_07_24_115507) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_08_060000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -29,12 +29,14 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_24_115507) do
     t.uuid "accountable_id"
     t.decimal "balance", precision: 19, scale: 4
     t.string "currency"
-    t.virtual "classification", type: :string, as: "\nCASE\n    WHEN ((accountable_type)::text = ANY ((ARRAY['Loan'::character varying, 'CreditCard'::character varying, 'OtherLiability'::character varying])::text[])) THEN 'liability'::text\n    ELSE 'asset'::text\nEND", stored: true
+    t.virtual "classification", type: :string, as: "\nCASE\n    WHEN ((accountable_type)::text = ANY (ARRAY[('Loan'::character varying)::text, ('CreditCard'::character varying)::text, ('OtherLiability'::character varying)::text])) THEN 'liability'::text\n    ELSE 'asset'::text\nEND", stored: true
     t.uuid "import_id"
     t.uuid "plaid_account_id"
     t.decimal "cash_balance", precision: 19, scale: 4, default: "0.0"
     t.jsonb "locked_attributes", default: {}
     t.string "status", default: "active"
+    t.uuid "simplefin_account_id"
+    t.uuid "klutch_account_id"
     t.index ["accountable_id", "accountable_type"], name: "index_accounts_on_accountable_id_and_accountable_type"
     t.index ["accountable_type"], name: "index_accounts_on_accountable_type"
     t.index ["currency"], name: "index_accounts_on_currency"
@@ -43,7 +45,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_24_115507) do
     t.index ["family_id", "status"], name: "index_accounts_on_family_id_and_status"
     t.index ["family_id"], name: "index_accounts_on_family_id"
     t.index ["import_id"], name: "index_accounts_on_import_id"
+    t.index ["klutch_account_id"], name: "index_accounts_on_klutch_account_id"
     t.index ["plaid_account_id"], name: "index_accounts_on_plaid_account_id"
+    t.index ["simplefin_account_id"], name: "index_accounts_on_simplefin_account_id"
     t.index ["status"], name: "index_accounts_on_status"
   end
 
@@ -233,12 +237,16 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_24_115507) do
     t.boolean "excluded", default: false
     t.string "plaid_id"
     t.jsonb "locked_attributes", default: {}
+    t.string "simplefin_id"
+    t.string "klutch_id"
     t.index "lower((name)::text)", name: "index_entries_on_lower_name"
     t.index ["account_id", "date"], name: "index_entries_on_account_id_and_date"
     t.index ["account_id"], name: "index_entries_on_account_id"
     t.index ["date"], name: "index_entries_on_date"
     t.index ["entryable_type"], name: "index_entries_on_entryable_type"
     t.index ["import_id"], name: "index_entries_on_import_id"
+    t.index ["klutch_id"], name: "index_entries_on_klutch_id"
+    t.index ["simplefin_id"], name: "index_entries_on_simplefin_id"
   end
 
   create_table "exchange_rates", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -411,6 +419,34 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_24_115507) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["token"], name: "index_invite_codes_on_token", unique: true
+  end
+
+  create_table "klutch_accounts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "klutch_item_id", null: false
+    t.string "klutch_id", null: false
+    t.string "name", null: false
+    t.string "currency", default: "USD", null: false
+    t.decimal "current_balance", precision: 19, scale: 4
+    t.jsonb "raw_payload", default: {}
+    t.jsonb "raw_transactions_payload", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["klutch_id"], name: "index_klutch_accounts_on_klutch_id", unique: true
+    t.index ["klutch_item_id"], name: "index_klutch_accounts_on_klutch_item_id"
+  end
+
+  create_table "klutch_items", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "family_id", null: false
+    t.string "endpoint", null: false
+    t.string "client_id", null: false
+    t.string "secret_key", null: false
+    t.string "name", null: false
+    t.string "status", default: "good", null: false
+    t.boolean "scheduled_for_deletion", default: false
+    t.jsonb "raw_payload", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["family_id"], name: "index_klutch_items_on_family_id"
   end
 
   create_table "loans", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -672,6 +708,36 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_24_115507) do
     t.index ["var"], name: "index_settings_on_var", unique: true
   end
 
+  create_table "simplefin_accounts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "simplefin_item_id", null: false
+    t.string "simplefin_id", null: false
+    t.string "account_type"
+    t.decimal "current_balance", precision: 19, scale: 4
+    t.decimal "available_balance", precision: 19, scale: 4
+    t.string "currency", null: false
+    t.string "name", null: false
+    t.string "org_name"
+    t.string "org_url"
+    t.jsonb "raw_payload", default: {}
+    t.jsonb "raw_transactions_payload", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["simplefin_id"], name: "index_simplefin_accounts_on_simplefin_id", unique: true
+    t.index ["simplefin_item_id"], name: "index_simplefin_accounts_on_simplefin_item_id"
+  end
+
+  create_table "simplefin_items", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "family_id", null: false
+    t.string "access_url", null: false
+    t.string "name", null: false
+    t.string "status", default: "good", null: false
+    t.boolean "scheduled_for_deletion", default: false
+    t.jsonb "raw_payload", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["family_id"], name: "index_simplefin_items_on_family_id"
+  end
+
   create_table "subscriptions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "family_id", null: false
     t.string "status", null: false
@@ -826,7 +892,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_24_115507) do
 
   add_foreign_key "accounts", "families"
   add_foreign_key "accounts", "imports"
+  add_foreign_key "accounts", "klutch_accounts"
   add_foreign_key "accounts", "plaid_accounts"
+  add_foreign_key "accounts", "simplefin_accounts"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "api_keys", "users"
@@ -848,6 +916,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_24_115507) do
   add_foreign_key "imports", "families"
   add_foreign_key "invitations", "families"
   add_foreign_key "invitations", "users", column: "inviter_id"
+  add_foreign_key "klutch_accounts", "klutch_items"
+  add_foreign_key "klutch_items", "families"
   add_foreign_key "merchants", "families"
   add_foreign_key "messages", "chats"
   add_foreign_key "mobile_devices", "users"
@@ -864,6 +934,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_24_115507) do
   add_foreign_key "security_prices", "securities"
   add_foreign_key "sessions", "impersonation_sessions", column: "active_impersonator_session_id"
   add_foreign_key "sessions", "users"
+  add_foreign_key "simplefin_accounts", "simplefin_items"
+  add_foreign_key "simplefin_items", "families"
   add_foreign_key "subscriptions", "families"
   add_foreign_key "syncs", "syncs", column: "parent_id"
   add_foreign_key "taggings", "tags"
