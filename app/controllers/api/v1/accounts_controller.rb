@@ -4,7 +4,8 @@ class Api::V1::AccountsController < Api::V1::BaseController
   include Pagy::Backend
 
   # Ensure proper scope authorization for read access
-  before_action :ensure_read_scope
+  before_action :ensure_read_scope, only: :index
+  before_action :ensure_write_scope, only: :sync_all
 
   def index
     # Test with Pagy pagination
@@ -30,12 +31,44 @@ class Api::V1::AccountsController < Api::V1::BaseController
       error: "internal_server_error",
       message: "Error: #{e.message}"
     }, status: :internal_server_error
+  end
+
+  def sync_all
+    family = current_resource_owner.family
+
+    if family.syncing?
+      render_json({ message: "Sync already in progress" }, status: :ok)
+    else
+      family.sync_later
+      sync = family.syncs.order(created_at: :desc).first
+
+      render_json({
+        message: "Sync initiated for all accounts",
+        sync: {
+          id: sync&.id,
+          status: sync&.status,
+          created_at: sync&.created_at
+        }
+      }, status: :accepted)
+    end
+  rescue => e
+    Rails.logger.error "AccountsController#sync_all error: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+
+    render json: {
+      error: "internal_server_error",
+      message: "Error: #{e.message}"
+    }, status: :internal_server_error
 end
 
     private
 
       def ensure_read_scope
         authorize_scope!(:read)
+      end
+
+      def ensure_write_scope
+        authorize_scope!(:write)
       end
 
 

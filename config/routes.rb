@@ -209,7 +209,11 @@ Rails.application.routes.draw do
       post "auth/refresh", to: "auth#refresh"
 
       # Production API endpoints
-      resources :accounts, only: [ :index ]
+      resources :accounts, only: [ :index ] do
+        collection do
+          post :sync, action: :sync_all
+        end
+      end
       resources :transactions, only: [ :index, :show, :create, :update, :destroy ]
       resource :usage, only: [ :show ], controller: "usage"
 
