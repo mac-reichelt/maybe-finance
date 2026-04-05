@@ -48,10 +48,6 @@ class SimplefinAccount < ApplicationRecord
       return "credit" if name.match?(/\b(visa|mastercard|credit\s*card|store\s*card|amex)\b/i)
       return "credit" if org_name.match?(/credit\s*card/i)
 
-      if name.match?(/\b(savings?|checking|money\s*market)\b/i)
-        "depository"
-      else
-        "depository"
-      end
+      "depository"
     end
 end
