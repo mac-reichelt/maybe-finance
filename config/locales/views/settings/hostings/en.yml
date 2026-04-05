@@ -28,6 +28,13 @@ en:
         placeholder: Enter your API key here
         plan: "%{plan} plan"
         title: Synth Settings
+      ollama_settings:
+        title: Ollama (Local AI)
+        description: Connect to a local Ollama instance for AI features (categorization,
+          merchant detection, chat) without API costs.
+        env_configured: Ollama is configured via environment variables.
+        url_label: Ollama URL
+        model_label: Model
       update:
         failure: Invalid setting value
         success: Settings updated

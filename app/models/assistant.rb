@@ -57,6 +57,8 @@ class Assistant
     end
 
     responder.respond(previous_response_id: latest_response_id)
+
+    stop_thinking
   rescue => e
     stop_thinking
     chat.add_error(e)

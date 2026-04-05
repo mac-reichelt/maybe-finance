@@ -87,7 +87,12 @@ class User < ApplicationRecord
   end
 
   def ai_available?
-    !Rails.application.config.app_mode.self_hosted? || ENV["OPENAI_ACCESS_TOKEN"].present?
+    return true unless Rails.application.config.app_mode.self_hosted?
+
+    ENV["OPENAI_ACCESS_TOKEN"].present? ||
+      ENV["OLLAMA_BASE_URL"].present? ||
+      Setting.openai_access_token.present? ||
+      Setting.ollama_base_url.present?
   end
 
   def ai_enabled?

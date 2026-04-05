@@ -1,0 +1,32 @@
+<div class="space-y-4">
+  <div>
+    <h2 class="font-medium mb-1"><%= t(".title") %></h2>
+    <% if ENV["OLLAMA_BASE_URL"].present? %>
+      <p class="text-sm text-secondary"><%= t(".env_configured") %></p>
+    <% else %>
+      <p class="text-secondary text-sm mb-4"><%= t(".description") %></p>
+    <% end %>
+  </div>
+
+  <%= styled_form_with model: Setting.new,
+                       url: settings_hosting_path,
+                       method: :patch,
+                       data: {
+                         controller: "auto-submit-form",
+                         "auto-submit-form-trigger-event-value": "blur"
+                       } do |form| %>
+    <%= form.text_field :ollama_base_url,
+                        label: t(".url_label"),
+                        placeholder: "http://ollama:11434",
+                        value: ENV.fetch("OLLAMA_BASE_URL", Setting.ollama_base_url),
+                        disabled: ENV["OLLAMA_BASE_URL"].present?,
+                        data: { "auto-submit-form-target": "auto" } %>
+
+    <%= form.text_field :ollama_model,
+                        label: t(".model_label"),
+                        placeholder: "qwen2.5:7b",
+                        value: ENV.fetch("OLLAMA_MODEL", Setting.ollama_model),
+                        disabled: ENV["OLLAMA_MODEL"].present?,
+                        data: { "auto-submit-form-target": "auto" } %>
+  <% end %>
+</div>

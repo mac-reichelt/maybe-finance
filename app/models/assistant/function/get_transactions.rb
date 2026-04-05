@@ -68,7 +68,7 @@ class Assistant::Function::GetTransactions < Assistant::Function
 
   def params_schema
     build_schema(
-      required: [ "order", "page", "page_size" ],
+      required: [ "order", "page" ],
       properties: {
         page: {
           type: "integer",
@@ -108,7 +108,7 @@ class Assistant::Function::GetTransactions < Assistant::Function
         },
         categories: {
           type: "array",
-          description: "Filter transactions by category name",
+          description: "Filter transactions by category name. Selecting a parent category automatically includes its subcategories.",
           items: { enum: family_category_names },
           minItems: 1,
           uniqueItems: true
@@ -132,7 +132,7 @@ class Assistant::Function::GetTransactions < Assistant::Function
   end
 
   def call(params = {})
-    search_params = params.except("order", "page")
+    search_params = params.except("order", "page", "page_size")
 
     search = Transaction::Search.new(family, filters: search_params)
     transactions_query = search.transactions_scope

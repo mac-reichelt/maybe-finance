@@ -67,6 +67,16 @@ class Provider::Registry
 
         Provider::Openai.new(access_token)
       end
+
+      def ollama
+        base_url = ENV.fetch("OLLAMA_BASE_URL", Setting.ollama_base_url)
+
+        return nil unless base_url.present?
+
+        model = ENV.fetch("OLLAMA_MODEL", Setting.ollama_model).presence
+
+        Provider::Ollama.new(base_url, model: model)
+      end
   end
 
   def initialize(concept)
@@ -96,9 +106,9 @@ class Provider::Registry
       when :securities
         %i[synth]
       when :llm
-        %i[openai]
+        %i[ollama openai]
       else
-        %i[synth plaid_us plaid_eu github openai]
+        %i[synth plaid_us plaid_eu github openai ollama]
       end
     end
 end

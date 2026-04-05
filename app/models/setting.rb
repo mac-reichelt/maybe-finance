@@ -5,6 +5,9 @@ class Setting < RailsSettings::Base
   field :synth_api_key, type: :string, default: ENV["SYNTH_API_KEY"]
   field :openai_access_token, type: :string, default: ENV["OPENAI_ACCESS_TOKEN"]
 
+  field :ollama_base_url, type: :string, default: ENV["OLLAMA_BASE_URL"]
+  field :ollama_model, type: :string, default: ENV.fetch("OLLAMA_MODEL", "qwen2.5:7b")
+
   field :require_invite_for_signup, type: :boolean, default: false
   field :require_email_confirmation, type: :boolean, default: ENV.fetch("REQUIRE_EMAIL_CONFIRMATION", "true") == "true"
 end
