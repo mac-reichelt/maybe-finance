@@ -96,6 +96,17 @@ Rails.application.routes.draw do
 
   resources :family_merchants, only: %i[index new create edit update destroy]
 
+  resources :recurring_transactions do
+    member do
+      post :confirm
+      post :dismiss
+    end
+
+    collection do
+      post :detect
+    end
+  end
+
   resources :transfers, only: %i[new create destroy show update]
 
   resources :imports, only: %i[index new show create destroy] do

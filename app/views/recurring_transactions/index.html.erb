@@ -1,0 +1,81 @@
+<div class="space-y-4">
+  <header class="flex justify-between items-center text-primary font-medium">
+    <h1 class="text-xl">Recurring Transactions</h1>
+    <div class="flex items-center gap-2">
+      <%= render DS::Button.new(
+        text: "Auto-detect",
+        icon: "scan-search",
+        variant: "outline",
+        href: detect_recurring_transactions_path,
+        method: :post
+      ) %>
+
+      <%= render DS::Link.new(
+        text: "New recurring",
+        icon: "plus",
+        variant: "primary",
+        href: new_recurring_transaction_path,
+        frame: :modal
+      ) %>
+    </div>
+  </header>
+
+  <% if @pending.any? %>
+    <div class="bg-container rounded-xl shadow-border-xs p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <%= icon("bell", size: "sm") %>
+        <h2 class="text-sm font-medium text-primary">Pending Confirmation (<%= @pending.size %>)</h2>
+      </div>
+      <p class="text-xs text-secondary mb-4">These recurring transactions were auto-detected from your history. Confirm or dismiss them.</p>
+      <div class="space-y-1">
+        <% @pending.each do |rt| %>
+          <%= render "recurring_transaction", recurring_transaction: rt, show_actions: true %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="bg-container rounded-xl shadow-border-xs p-4">
+    <div class="flex items-center gap-2 mb-3">
+      <%= icon("repeat", size: "sm") %>
+      <h2 class="text-sm font-medium text-primary">Active Recurring Transactions (<%= @active.size %>)</h2>
+    </div>
+
+    <% if @active.any? %>
+      <div class="hidden md:grid grid-cols-12 bg-container-inset rounded-xl px-5 py-3 text-xs uppercase font-medium text-secondary items-center mb-4">
+        <p class="col-span-4">Name</p>
+        <p class="col-span-2">Frequency</p>
+        <p class="col-span-2">Next Date</p>
+        <p class="col-span-2">Type</p>
+        <p class="col-span-2 justify-self-end">Amount</p>
+      </div>
+
+      <div class="space-y-1">
+        <% @active.each do |rt| %>
+          <%= render "recurring_transaction", recurring_transaction: rt, show_actions: false %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="flex justify-center items-center py-20">
+        <div class="text-center flex flex-col items-center max-w-[500px]">
+          <p class="text-sm text-secondary mb-4">No recurring transactions yet. Create one manually or run auto-detection to find patterns in your transaction history.</p>
+          <div class="flex items-center gap-2">
+            <%= render DS::Button.new(
+              text: "Auto-detect",
+              icon: "scan-search",
+              href: detect_recurring_transactions_path,
+              method: :post
+            ) %>
+            <%= render DS::Link.new(
+              text: "New recurring",
+              variant: "outline",
+              icon: "plus",
+              href: new_recurring_transaction_path,
+              frame: :modal
+            ) %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

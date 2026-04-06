@@ -1,0 +1,28 @@
+monthly_netflix:
+  family: dylan_family
+  title: Netflix
+  amount: 15.99
+  currency: USD
+  frequency: monthly
+  frequency_day: 15
+  start_date: <%= 6.months.ago.to_date %>
+  next_expected_date: <%= 15.days.from_now.to_date %>
+  is_subscription: true
+  auto_detected: false
+  status: active
+  merchant: netflix
+  category: food_and_drink
+
+pending_detected:
+  family: dylan_family
+  title: Amazon Prime
+  amount: 14.99
+  currency: USD
+  frequency: monthly
+  start_date: <%= 3.months.ago.to_date %>
+  next_expected_date: <%= 10.days.from_now.to_date %>
+  is_subscription: true
+  auto_detected: true
+  confidence_score: 0.85
+  status: pending_confirmation
+  merchant: amazon
