@@ -37,7 +37,7 @@ class RecurringTransaction::DetectorTest < ActiveSupport::TestCase
 
     # Only 2 transactions - below minimum threshold
     2.times do |i|
-      txn = Transaction.create!(merchant: merchant)
+      txn = Transaction.create!(category: categories(:food_and_drink), merchant: merchant)
       Entry.create!(
         account: @account,
         name: "Amazon",

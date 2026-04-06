@@ -75,13 +75,15 @@ class RecurringTransaction < ApplicationRecord
     today = Date.current
 
     # Find the next occurrence after today
+    interval = frequency_interval.presence || 1
+
     self.next_expected_date = case frequency
     when "daily"
-      days = ((today - base_date).to_i / frequency_interval.to_i) + 1
-      base_date + (days * frequency_interval.to_i).days
+      days = ((today - base_date).to_i / interval) + 1
+      base_date + (days * interval).days
     when "weekly"
-      weeks = ((today - base_date).to_i / (7 * (frequency_interval || 1))) + 1
-      base_date + (weeks * (frequency_interval || 1)).weeks
+      weeks = ((today - base_date).to_i / (7 * interval)) + 1
+      base_date + (weeks * interval).weeks
     when "monthly"
       next_monthly_date(base_date, today)
     when "semi_monthly"

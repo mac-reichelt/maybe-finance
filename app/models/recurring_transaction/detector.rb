@@ -160,7 +160,7 @@ class RecurringTransaction::Detector
 
       # Check for daily pattern
       if avg_interval.between?(0.8, 1.5)
-        consistency = intervals.count { |i| i == 1 }.to_f / intervals.size
+        consistency = intervals.count { |i| i.between?(0, 2) }.to_f / intervals.size
         return { frequency: "daily", frequency_day: nil, confidence: consistency } if consistency >= 0.6
       end
 

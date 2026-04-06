@@ -37,9 +37,9 @@
 
     <div class="hidden md:block col-span-2">
       <% if recurring_transaction.subscription? %>
-        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700">Subscription</span>
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-container-inset text-primary">Subscription</span>
       <% else %>
-        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Recurring</span>
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-container-inset text-secondary">Recurring</span>
       <% end %>
     </div>
 
@@ -76,7 +76,7 @@
         <% end %>
         <% if recurring_transaction.subscription? %>
           <span>&middot;</span>
-          <span class="text-violet-600">Subscription</span>
+          <span class="text-primary">Subscription</span>
         <% end %>
       </div>
       <div class="flex items-center gap-2">
