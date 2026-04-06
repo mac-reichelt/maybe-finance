@@ -24,6 +24,6 @@ class CreateRecurringTransactions < ActiveRecord::Migration[7.2]
 
     add_index :recurring_transactions, :status
     add_index :recurring_transactions, :next_expected_date
-    add_index :recurring_transactions, [:family_id, :title]
+    add_index :recurring_transactions, [ :family_id, :title ]
   end
 end
