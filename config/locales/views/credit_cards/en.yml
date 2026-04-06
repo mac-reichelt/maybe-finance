@@ -10,9 +10,15 @@ en:
       apr_placeholder: '15.99'
       available_credit: Available credit
       available_credit_placeholder: '10000'
+      cashback_percentage: Cashback %
+      cashback_percentage_placeholder: '1.5'
       expiration_date: Expiration date
       minimum_payment: Minimum payment
       minimum_payment_placeholder: '100'
+      payment_due_day: Payment due date
+      payment_due_day_placeholder: '15'
+      statement_end_day: Statement end date
+      statement_end_day_placeholder: '25'
     new:
       title: Enter credit card details
     overview:
@@ -20,6 +26,10 @@ en:
       annual_fee: Annual Fee
       apr: APR
       available_credit: Available Credit
+      cashback: Cashback
+      day_of_month: Day %{day}
       expiration_date: Expiration Date
       minimum_payment: Minimum Payment
+      payment_due_day: Payment Due Date
+      statement_end_day: Statement End Date
       unknown: Unknown

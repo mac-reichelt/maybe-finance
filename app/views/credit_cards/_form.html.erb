@@ -33,6 +33,28 @@
                                         placeholder: t("credit_cards.form.annual_fee_placeholder"),
                                         min: 0 %>
       </div>
+
+      <div class="flex items-center gap-2">
+        <%= credit_card_form.number_field :statement_end_day,
+                                        label: t("credit_cards.form.statement_end_day"),
+                                        placeholder: t("credit_cards.form.statement_end_day_placeholder"),
+                                        min: 1,
+                                        max: 31,
+                                        step: 1 %>
+
+        <%= credit_card_form.number_field :payment_due_day,
+                                        label: t("credit_cards.form.payment_due_day"),
+                                        placeholder: t("credit_cards.form.payment_due_day_placeholder"),
+                                        min: 1,
+                                        max: 31,
+                                        step: 1 %>
+
+        <%= credit_card_form.number_field :cashback_percentage,
+                                        label: t("credit_cards.form.cashback_percentage"),
+                                        placeholder: t("credit_cards.form.cashback_percentage_placeholder"),
+                                        min: 0,
+                                        step: 0.01 %>
+      </div>
     <% end %>
   </div>
 <% end %>

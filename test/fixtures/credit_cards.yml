@@ -4,4 +4,7 @@ one:
   apr: 18.99
   expiration_date: <%= 4.years.from_now.to_date %>
   annual_fee: 95.00
+  statement_end_day: 25
+  payment_due_day: 15
+  cashback_percentage: 1.50
   

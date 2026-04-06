@@ -195,6 +195,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_06_011452) do
     t.date "expiration_date"
     t.decimal "annual_fee", precision: 10, scale: 2
     t.jsonb "locked_attributes", default: {}
+    t.integer "statement_end_day"
+    t.integer "payment_due_day"
+    t.decimal "cashback_percentage", precision: 10, scale: 2
   end
 
   create_table "cryptos", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
