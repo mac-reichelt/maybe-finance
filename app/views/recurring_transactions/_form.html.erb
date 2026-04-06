@@ -1,0 +1,38 @@
+<%= styled_form_with model: recurring_transaction, class: "space-y-4" do |f| %>
+  <%= f.text_field :title, label: "Name", placeholder: "e.g., Netflix, Rent, Gym Membership", required: true %>
+
+  <div class="flex items-center gap-2">
+    <%= f.number_field :amount, label: "Amount", step: 0.01, min: 0, required: true, container_class: "w-2/3" %>
+    <%= f.text_field :currency, label: "Currency", value: recurring_transaction.currency || Current.family.currency, container_class: "w-1/3" %>
+  </div>
+
+  <%= f.select :frequency,
+    RecurringTransaction::FREQUENCIES.map { |f_val| [f_val.humanize, f_val] },
+    { label: "Frequency", include_blank: false } %>
+
+  <div class="flex items-center gap-2">
+    <%= f.date_field :start_date, label: "Start Date", container_class: "w-1/2" %>
+    <%= f.date_field :end_date, label: "End Date (optional)", container_class: "w-1/2" %>
+  </div>
+
+  <%= f.collection_select :category_id,
+    categories, :id, :name,
+    { label: "Category", include_blank: "None" } %>
+
+  <%= f.collection_select :merchant_id,
+    merchants, :id, :name,
+    { label: "Merchant", include_blank: "None" } %>
+
+  <div class="flex items-center gap-3 py-2">
+    <%= f.check_box :is_subscription, class: "checkbox" %>
+    <%= f.label :is_subscription, "This is a subscription", class: "text-sm text-primary cursor-pointer" %>
+  </div>
+
+  <div class="flex justify-end gap-2 pt-2">
+    <%= render DS::Button.new(
+      text: recurring_transaction.persisted? ? "Save changes" : "Create",
+      variant: "primary",
+      type: "submit"
+    ) %>
+  </div>
+<% end %>

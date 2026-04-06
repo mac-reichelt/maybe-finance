@@ -1,0 +1,105 @@
+<% content_tag :div, id: dom_id(recurring_transaction), class: "group" do %>
+  <div class="grid grid-cols-12 items-center px-4 py-3 rounded-lg hover:bg-container-hover">
+    <div class="col-span-12 md:col-span-4 flex items-center gap-3">
+      <div class="w-8 h-8 rounded-full flex items-center justify-center bg-container-inset">
+        <% if recurring_transaction.subscription? %>
+          <%= icon("credit-card", size: "sm") %>
+        <% else %>
+          <%= icon("repeat", size: "sm") %>
+        <% end %>
+      </div>
+      <div class="min-w-0">
+        <%= link_to recurring_transaction.title,
+              recurring_transaction_path(recurring_transaction),
+              class: "text-primary text-sm font-medium hover:underline truncate block",
+              data: { turbo_frame: :drawer } %>
+        <% if recurring_transaction.merchant %>
+          <p class="text-xs text-secondary truncate"><%= recurring_transaction.merchant.name %></p>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="hidden md:block col-span-2 text-sm text-secondary">
+      <%= recurring_transaction.frequency_label %>
+    </div>
+
+    <div class="hidden md:block col-span-2 text-sm">
+      <% if recurring_transaction.next_expected_date %>
+        <% if recurring_transaction.overdue? %>
+          <span class="text-destructive font-medium"><%= recurring_transaction.next_expected_date.strftime("%b %d, %Y") %></span>
+        <% else %>
+          <span class="text-secondary"><%= recurring_transaction.next_expected_date.strftime("%b %d, %Y") %></span>
+        <% end %>
+      <% else %>
+        <span class="text-subdued">—</span>
+      <% end %>
+    </div>
+
+    <div class="hidden md:block col-span-2">
+      <% if recurring_transaction.subscription? %>
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-container-inset text-primary">Subscription</span>
+      <% else %>
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-container-inset text-secondary">Recurring</span>
+      <% end %>
+    </div>
+
+    <div class="hidden md:flex col-span-2 justify-end items-center gap-2">
+      <span class="text-sm font-medium text-primary"><%= number_to_currency(recurring_transaction.amount, unit: Money::Currency.new(recurring_transaction.currency).symbol) %></span>
+
+      <% if local_assigns[:show_actions] && recurring_transaction.status == "pending_confirmation" %>
+        <div class="flex items-center gap-1">
+          <%= render DS::Button.new(
+            text: "Confirm",
+            variant: "primary",
+            size: :sm,
+            href: confirm_recurring_transaction_path(recurring_transaction),
+            method: :post
+          ) %>
+          <%= render DS::Button.new(
+            text: "Dismiss",
+            variant: "outline",
+            size: :sm,
+            href: dismiss_recurring_transaction_path(recurring_transaction),
+            method: :post
+          ) %>
+        </div>
+      <% end %>
+    </div>
+
+    <%# Mobile summary row %>
+    <div class="col-span-12 md:hidden flex items-center justify-between mt-1">
+      <div class="flex items-center gap-2 text-xs text-secondary">
+        <span><%= recurring_transaction.frequency_label %></span>
+        <% if recurring_transaction.next_expected_date %>
+          <span>&middot;</span>
+          <span><%= recurring_transaction.next_expected_date.strftime("%b %d") %></span>
+        <% end %>
+        <% if recurring_transaction.subscription? %>
+          <span>&middot;</span>
+          <span class="text-primary">Subscription</span>
+        <% end %>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-medium text-primary"><%= number_to_currency(recurring_transaction.amount, unit: Money::Currency.new(recurring_transaction.currency).symbol) %></span>
+        <% if local_assigns[:show_actions] && recurring_transaction.status == "pending_confirmation" %>
+          <div class="flex items-center gap-1">
+            <%= render DS::Button.new(
+              text: "✓",
+              variant: "primary",
+              size: :sm,
+              href: confirm_recurring_transaction_path(recurring_transaction),
+              method: :post
+            ) %>
+            <%= render DS::Button.new(
+              text: "✕",
+              variant: "outline",
+              size: :sm,
+              href: dismiss_recurring_transaction_path(recurring_transaction),
+              method: :post
+            ) %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>
