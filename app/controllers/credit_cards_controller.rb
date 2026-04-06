@@ -7,6 +7,9 @@ class CreditCardsController < ApplicationController
     :minimum_payment,
     :apr,
     :annual_fee,
-    :expiration_date
+    :expiration_date,
+    :statement_end_day,
+    :payment_due_day,
+    :cashback_percentage
   )
 end

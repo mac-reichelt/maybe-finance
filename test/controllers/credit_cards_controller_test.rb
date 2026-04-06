@@ -24,7 +24,10 @@ class CreditCardsControllerTest < ActionDispatch::IntegrationTest
             minimum_payment: 25.51,
             apr: 15.99,
             expiration_date: 2.years.from_now.to_date,
-            annual_fee: 99
+            annual_fee: 99,
+            statement_end_day: 25,
+            payment_due_day: 15,
+            cashback_percentage: 1.5
           }
         }
       }
@@ -40,6 +43,9 @@ class CreditCardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 15.99, created_account.accountable.apr
     assert_equal 2.years.from_now.to_date, created_account.accountable.expiration_date
     assert_equal 99, created_account.accountable.annual_fee
+    assert_equal 25, created_account.accountable.statement_end_day
+    assert_equal 15, created_account.accountable.payment_due_day
+    assert_equal 1.5, created_account.accountable.cashback_percentage
 
     assert_redirected_to created_account
     assert_equal "Credit card account created", flash[:notice]
@@ -60,7 +66,10 @@ class CreditCardsControllerTest < ActionDispatch::IntegrationTest
             minimum_payment: 50,
             apr: 14.99,
             expiration_date: 3.years.from_now.to_date,
-            annual_fee: 0
+            annual_fee: 0,
+            statement_end_day: 28,
+            payment_due_day: 20,
+            cashback_percentage: 2.0
           }
         }
       }
@@ -75,6 +84,9 @@ class CreditCardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 14.99, @account.accountable.apr
     assert_equal 3.years.from_now.to_date, @account.accountable.expiration_date
     assert_equal 0, @account.accountable.annual_fee
+    assert_equal 28, @account.accountable.statement_end_day
+    assert_equal 20, @account.accountable.payment_due_day
+    assert_equal 2.0, @account.accountable.cashback_percentage
 
     assert_redirected_to @account
     assert_equal "Credit card account updated", flash[:notice]

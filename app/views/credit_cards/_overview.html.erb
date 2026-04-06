@@ -24,6 +24,18 @@
   <%= summary_card title: t(".annual_fee") do %>
     <%= format_money(account.credit_card.annual_fee_money || Money.new(0, account.currency)) %>
   <% end %>
+
+  <%= summary_card title: t(".statement_end_day") do %>
+    <%= account.credit_card.statement_end_day ? t(".day_of_month", day: account.credit_card.statement_end_day) : t(".unknown") %>
+  <% end %>
+
+  <%= summary_card title: t(".payment_due_day") do %>
+    <%= account.credit_card.payment_due_day ? t(".day_of_month", day: account.credit_card.payment_due_day) : t(".unknown") %>
+  <% end %>
+
+  <%= summary_card title: t(".cashback") do %>
+    <%= account.credit_card.cashback_percentage ? number_to_percentage(account.credit_card.cashback_percentage, precision: 2) : t(".unknown") %>
+  <% end %>
 </div>
 
 <div class="flex justify-center py-8">
